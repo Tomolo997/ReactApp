@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import Navbar from './components/layout/Navbar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Users from './components/users/Users';
@@ -8,113 +8,113 @@ import Alert from './components/layout/Alert';
 import About from './components/pages/About';
 import axios from 'axios';
 import './App.css';
-class App extends Component {
+const App = () => {
   //if we want to fetch we want to do it in this funciton
-  state = {
-    users: [],
-    user: {},
-    repos: [],
-    loading: false,
-    alert: null,
-  };
+
+  const [users, setUsers] = useState([]);
+  const [user, setUser] = useState({});
+  const [repos, setRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   // search GITGUB users
-  searchUsers = async (text) => {
-    this.setState({ loading: true });
+  const searchUsers = async (text) => {
+    setLoading(true);
     const res = await axios.get(
       `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     );
     //after we load the state we insert the data to the state object
     console.log(res);
-    this.setState({ users: res.data.items, loading: false });
+    setUsers(res.data.items);
+    setLoading(false);
   };
 
   //clear users from state
-  clearUsers = () => {
-    this.setState({ users: [] });
+  const clearUsers = () => {
+    setUsers([]);
+    setLoading(false);
   };
 
-  getUser = async (username) => {
-    this.setState({ loading: true });
+  const getUser = async (username) => {
+    setLoading(true);
+
     const res = await axios.get(
       `https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     );
     //after we load the state we insert the data to the state object
-    console.log(res);
-    this.setState({ user: res.data, loading: false });
+    setUser(res.data);
+    setLoading(false);
   };
 
   //Get users repos
-  getUserRepos = async (username) => {
-    this.setState({ loading: true });
+  const getUserRepos = async (username) => {
+    setLoading(true);
     const res = await axios.get(
       `https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     );
     //after we load the state we insert the data to the state object
     console.log(res);
-    this.setState({ repos: res.data, loading: false });
+    setRepos(res.data);
+    setLoading(false);
   };
 
   //Set alert
-  setAlert = (msg, type) => {
-    this.setState({ alert: { msg: msg, tyle: type } });
+  const setAlertApp = (msg, type) => {
+    setAlert({ msg: msg, tyle: type });
     setTimeout(() => {
-      this.setState({ alert: null });
+      setAlert(null);
     }, 5000);
   };
 
-  render() {
-    //destruturing
-    const { users, loading, user, repos } = this.state;
+  //destruturing
 
-    return (
-      <Router>
-        {/* //if we dont wanna wrap h1 or h2 or sometthing else into the div we use
+  return (
+    <Router>
+      {/* //if we dont wanna wrap h1 or h2 or sometthing else into the div we use
         React.Fragment or only empty angles */}
-        <div className="App">
-          <Navbar title="Github finder" icon="fab fa-github" />
-          {/* we added the container around the users */}
-          <div className="container">
-            <Alert alert={this.state.alert} />
-            {/* we are passing the users from state to the props*/}
-            <Switch>
-              <Route
-                exact
-                path="/"
-                render={(props) => (
-                  <Fragment>
-                    <Search
-                      searchUsers={this.searchUsers}
-                      clearUsers={this.clearUsers}
-                      showClear={users.length > 0 ? true : false}
-                      setAlert={this.setAlert}
-                    />
-                    <Users loading={loading} users={users} />
-                  </Fragment>
-                )}
-              />
-              <Route exact path="/about" component={About} />
-              <Route
-                exact
-                path="/user/:login"
-                render={(props) => (
-                  <User
-                    {...props}
-                    getUser={this.getUser}
-                    getUserRepos={this.getUserRepos}
-                    user={user}
-                    repos={repos}
-                    loading={loading}
+      <div className="App">
+        <Navbar title="Github finder" icon="fab fa-github" />
+        {/* we added the container around the users */}
+        <div className="container">
+          <Alert alert={alert} />
+          {/* we are passing the users from state to the props*/}
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={(props) => (
+                <Fragment>
+                  <Search
+                    searchUsers={searchUsers}
+                    clearUsers={clearUsers}
+                    showClear={users.length > 0 ? true : false}
+                    setAlert={setAlertApp}
                   />
-                )}
-              />
-            </Switch>
-            {/* passing up the props from Search.js */}
-          </div>
+                  <Users loading={loading} users={users} />
+                </Fragment>
+              )}
+            />
+            <Route exact path="/about" component={About} />
+            <Route
+              exact
+              path="/user/:login"
+              render={(props) => (
+                <User
+                  {...props}
+                  getUser={getUser}
+                  getUserRepos={getUserRepos}
+                  user={user}
+                  repos={repos}
+                  loading={loading}
+                />
+              )}
+            />
+          </Switch>
+          {/* passing up the props from Search.js */}
         </div>
-      </Router>
-    );
-  }
-}
+      </div>
+    </Router>
+  );
+};
 
 export default App;
