@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { Link } from 'react-router-dom';
 //user item vzame argument user
 const UserItem = ({ user: { login, avatar_url, html_url } }) => {
   //Tukaj passamo "state" kot props, katerega smo dodali v Users componenti v UserItem
@@ -14,9 +14,9 @@ const UserItem = ({ user: { login, avatar_url, html_url } }) => {
       />
       <h3>{login}</h3>
       <div>
-        <a href={html_url} className="btn btn-dark bnt-sm my-1">
+        <Link to={`/user/${login}`} className="btn btn-dark bnt-sm my-1">
           More
-        </a>
+        </Link>
       </div>
     </div>
   );
